@@ -10,13 +10,13 @@ export const signin = async (req, res) => {
 
   try {
     const oldUser = await UserModal.findOne({ email });
-
+    //if the user doesnt exist in the database then return false message
     if (!oldUser) return res.status(404).json({ message: "User doesn't exist" });
-
+    //useing bycrypt to check the password
     const isPasswordCorrect = await bcrypt.compare(password, oldUser.password);
-
+    //if the password is incorrect then return false message
     if (!isPasswordCorrect) return res.status(400).json({ message: "Invalid credentials" });
-
+    //each user account can only stay up to 1h on the page
     const token = jwt.sign({ email: oldUser.email, id: oldUser._id }, secret, { expiresIn: "1h" });
 
     res.status(200).json({ result: oldUser, token });

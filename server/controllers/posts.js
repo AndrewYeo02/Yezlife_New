@@ -4,11 +4,25 @@ import mongoose from 'mongoose';
 import PostMessage from '../models/postMessage.js';
 
 const router = express.Router();
+// an api function allow user(specific id) to read the post
+export const getPost = async (req, res) => { 
+    const { id } = req.params;
+
+    try {
+        const post = await PostMessage.findById(id);
+        //http status code 200 means everything works well
+        res.status(200).json(post);
+    } catch (error) {
+        //http status code 404 means not good
+        res.status(404).json({ message: error.message });
+    }
+}
 
 export const getPosts = async (req, res) => {
     const { page } = req.query;
     
     try {
+        //page limit to 8
         const LIMIT = 8;
         const startIndex = (Number(page) - 1) * LIMIT; // get the starting index of every page
     
@@ -47,17 +61,7 @@ export const getPostsByCreator = async (req, res) => {
     }
 }
 
-export const getPost = async (req, res) => { 
-    const { id } = req.params;
 
-    try {
-        const post = await PostMessage.findById(id);
-        
-        res.status(200).json(post);
-    } catch (error) {
-        res.status(404).json({ message: error.message });
-    }
-}
 
 export const createPost = async (req, res) => {
     const post = req.body;
@@ -95,7 +99,7 @@ export const deletePost = async (req, res) => {
 
     res.json({ message: "Post deleted successfully." });
 }
-
+//handle like post in server function
 export const likePost = async (req, res) => {
     const { id } = req.params;
 
@@ -108,7 +112,7 @@ export const likePost = async (req, res) => {
     const post = await PostMessage.findById(id);
 
     const index = post.likes.findIndex((id) => id ===String(req.userId));
-
+//if the number of like is negative then returns -1. if the numnber is positive zero then it returns 0
     if (index === -1) {
       post.likes.push(req.userId);
     } else {
